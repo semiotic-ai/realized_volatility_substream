@@ -6,3 +6,7 @@ pub mod contract {
         // @@protoc_insertion_point(contract.v1)
     }
 }
+
+#[path = "sf.substreams.sink.files.v1.rs"]
+#[allow(dead_code)]
+pub mod sinkfiles;

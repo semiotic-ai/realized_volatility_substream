@@ -21,6 +21,16 @@ gui: build
 protogen:
 	substreams protogen ./substreams.yaml --exclude-paths="sf/substreams,google"
 
+.PHONY: stream_csv
+stream_csv: build
+	substreams run -e $(ENDPOINT) substreams.yaml csv_out $(if $(START_BLOCK),-s $(START_BLOCK)) $(if $(STOP_BLOCK),-t $(STOP_BLOCK))
+
+
+.PHONY: auth
+auth: 
+	source ./auth.sh
+
+
 .PHONY: pack
 pack: build
 	substreams pack substreams.yaml

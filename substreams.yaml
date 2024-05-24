@@ -4,6 +4,7 @@ package:
   version: v0.1.0
 
 imports:
+  sink_files: https://github.com/streamingfast/substreams-sink-files/releases/download/v0.2.0/substreams-sink-files-v0.2.0.spkg
   sql: https://github.com/streamingfast/substreams-sink-sql/releases/download/protodefs-v1.0.7/substreams-sink-sql-protodefs-v1.0.7.spkg
   graph: https://github.com/streamingfast/substreams-sink-subgraph/releases/download/v0.1.0/substreams-sink-subgraph-protodefs-v0.1.0.spkg
   database_change: https://github.com/streamingfast/substreams-sink-database-changes/releases/download/v1.2.1/substreams-database-change-v1.2.1.spkg
@@ -44,5 +45,14 @@ modules:
       - map: map_events
     output:
       type: proto:sf.substreams.entity.v1.EntityChanges
+
+  - name: csv_out 
+    kind: map
+    initialBlock: 13924641
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:substreams.sink.files.v1.Lines
+
 
 network: mainnet
