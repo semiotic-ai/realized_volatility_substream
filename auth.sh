@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Replace 'your-api-key' with your actual API key
-API_KEY="server_f6bfdbbcf810c4bc45e2e4a451cfecf2"
+API_KEY="server_b554992dda57297b8df60748ed61a10e"
 LIFETIME=3600
 
 # Check if jq is installed

@@ -1,7 +1,7 @@
 mod abi;
 mod pb;
 use hex_literal::hex;
-use pb::contract::v1 as contract;
+use pb::contract::v1::{self as contract, PoolSwap};
 use pb::sinkfiles::Lines;
 use serde_json::json;
 use substreams::Hex;
@@ -657,17 +657,37 @@ fn graph_out(events: contract::Events) -> Result<EntityChanges, substreams::erro
 }
 
 #[substreams::handlers::map]
-fn csv_out(block: eth::Block) -> Result<Lines, substreams::errors::Error> {
-    let header = block.header.as_ref().unwrap();
+fn csv_out(blk: eth::Block) -> Result<Lines, substreams::errors::Error> {
+    Ok(Lines {
+        lines: get_swaps(&blk).map(|trx| trx.to_csv()).collect(),
+    })
+}
 
-    Ok(pb::sinkfiles::Lines {
-        // Although we return a single line, you are free in your own code to return multiple lines, one per entity usually
-        lines: vec![json!({
-            "number": block.number,
-            "hash": Hex(&block.hash).to_string(),
-            "parent_hash": Hex(&header.parent_hash).to_string(),
-            "timestamp": header.timestamp.as_ref().unwrap().to_string()
-        })
-        .to_string()],
+fn get_swaps<'a>(blk: &'a eth::Block) -> impl Iterator<Item = PoolSwap> + 'a {
+    blk.receipts().flat_map(move |view| {
+        view.receipt
+            .logs
+            .iter()
+            .filter(move |log| log.address == POOL_TRACKED_CONTRACT)
+            .filter_map(move |log| {
+                if let Some(event) = abi::pool_contract::events::Swap::match_and_decode(log) {
+                    return Some(contract::PoolSwap {
+                        evt_tx_hash: Hex(&view.transaction.hash).to_string(),
+                        evt_index: log.block_index,
+                        evt_block_time: Some(blk.timestamp().to_owned()),
+                        evt_block_number: blk.number,
+                        amount0: event.amount0.to_string(),
+                        amount1: event.amount1.to_string(),
+                        liquidity: event.liquidity.to_string(),
+                        recipient: event.recipient,
+                        sender: event.sender,
+                        sqrt_price_x96: event.sqrt_price_x96.to_string(),
+                        tick: Into::<num_bigint::BigInt>::into(event.tick)
+                            .to_i64()
+                            .unwrap(),
+                    });
+                }
+                None
+            })
     })
 }
