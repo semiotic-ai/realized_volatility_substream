@@ -1,9 +1,8 @@
 mod abi;
-mod pb;
+pub mod pb;
 use hex_literal::hex;
 use pb::contract::v1::{self as contract, PoolSwap};
 use pb::sinkfiles::Lines;
-use serde_json::json;
 use substreams::Hex;
 use substreams_database_change::pb::database::DatabaseChanges;
 use substreams_database_change::tables::Tables as DatabaseChangeTables;
@@ -660,6 +659,15 @@ fn graph_out(events: contract::Events) -> Result<EntityChanges, substreams::erro
 fn csv_out(blk: eth::Block) -> Result<Lines, substreams::errors::Error> {
     Ok(Lines {
         lines: get_swaps(&blk).map(|trx| trx.to_csv()).collect(),
+    })
+}
+
+#[substreams::handlers::map]
+fn jsonl_out(blk: eth::Block) -> Result<Lines, substreams::errors::Error> {
+    Ok(Lines {
+        lines: get_swaps(&blk)
+            .map(|trx| serde_json::to_string(&trx).unwrap())
+            .collect(),
     })
 }
 

@@ -15,4 +15,12 @@ Then, Sink files with:
 substreams-sink-files run --encoder=lines --state-store=./output/state.yaml mainnet.eth.streamingfast.io:443 substreams.yaml csv_out ./output/files
 ```
 
+**Remember to `make build` before running `substreams` or `substreams-sink-files` to make it work.*
+
+Also, there is this in the substreams documentation if you want to change the block counts, and about how recent the blocks are:
+```
+When you use the substreams-sink-files tool, you will find that it syncs up to the most recent "final" block of the chain. This means it is not real-time. Additionally, the tool writes bundles to disk when it has seen 10,000 blocks. As a result, the latency of the last available bundle can be delayed by around 10,000 blocks. How many blocks per batch can be controlled by changing the flag --file-block-count
+```
+
+
 

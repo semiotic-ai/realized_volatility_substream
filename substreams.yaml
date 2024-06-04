@@ -54,5 +54,13 @@ modules:
     output:
       type: proto:substreams.sink.files.v1.Lines
 
+  - name: jsonl_out 
+    kind: map
+    initialBlock: 13924641
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:substreams.sink.files.v1.Lines
+
 
 network: mainnet
