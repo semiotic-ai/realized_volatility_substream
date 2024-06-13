@@ -22,5 +22,5 @@ Also, there is this in the substreams documentation if you want to change the bl
 When you use the substreams-sink-files tool, you will find that it syncs up to the most recent "final" block of the chain. This means it is not real-time. Additionally, the tool writes bundles to disk when it has seen 10,000 blocks. As a result, the latency of the last available bundle can be delayed by around 10,000 blocks. How many blocks per batch can be controlled by changing the flag --file-block-count
 ```
 
-
+There is also a tutorial in [here](https://github.com/streamingfast/substreams-sink-files/tree/master/docs/tutorial) on how to use substreams sink.
 
