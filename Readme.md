@@ -1,5 +1,6 @@
 # Realized volatility substream
 
+
 This substream is intended to calcualte the Realized volatility. It uses a UniswapV3Pool contract Swap events
 to figure out the correct value of Realized volatility in between blocks.
 
@@ -7,6 +8,8 @@ to figure out the correct value of Realized volatility in between blocks.
 - [same requirements of consuming substreams](https://substreams.streamingfast.io/documentation/consume/installing-the-cli)
 - [same requirements for file sink with substream](https://substreams.streamingfast.io/documentation/consume/other-sinks/files)
 
+
+Currently it works on version 1.5 of substreams only.
 
 It is necessary to auth first (script only works in bash): `source ./auth.sh`
 Then, Sink files with:
