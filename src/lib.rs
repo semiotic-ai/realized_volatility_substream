@@ -20,6 +20,42 @@ substreams_ethereum::init!();
 
 const POOL_TRACKED_CONTRACT: [u8; 20] = hex!("88e6a0c2ddd26feeb64f039a2c41296fcb3f5640");
 
+fn map_pool_swap_events(blk: &eth::Block, events: &mut contract::Events) {
+    events.pool_swaps.append(
+        &mut blk
+            .receipts()
+            .flat_map(|view| {
+                view.receipt
+                    .logs
+                    .iter()
+                    .filter(|log| log.address == POOL_TRACKED_CONTRACT)
+                    .filter_map(|log| {
+                        if let Some(event) = abi::pool_contract::events::Swap::match_and_decode(log)
+                        {
+                            return Some(contract::PoolSwap {
+                                evt_tx_hash: Hex(&view.transaction.hash).to_string(),
+                                evt_index: log.block_index,
+                                evt_block_time: Some(blk.timestamp().to_owned()),
+                                evt_block_number: blk.number,
+                                amount0: event.amount0.to_string(),
+                                amount1: event.amount1.to_string(),
+                                liquidity: event.liquidity.to_string(),
+                                recipient: event.recipient,
+                                sender: event.sender,
+                                sqrt_price_x96: event.sqrt_price_x96.to_string(),
+                                tick: Into::<num_bigint::BigInt>::into(event.tick)
+                                    .to_i64()
+                                    .unwrap(),
+                            });
+                        }
+
+                        None
+                    })
+            })
+            .collect(),
+    );
+}
+
 fn map_pool_events(blk: &eth::Block, events: &mut contract::Events) {
     events.pool_burns.append(
         &mut blk
@@ -633,6 +669,13 @@ fn graph_pool_out(events: &contract::Events, tables: &mut EntityChangesTables) {
 }
 
 #[substreams::handlers::map]
+fn map_swap_events(blk: eth::Block) -> Result<contract::Events, substreams::errors::Error> {
+    let mut events = contract::Events::default();
+    map_pool_swap_events(&blk, &mut events);
+    Ok(events)
+}
+
+#[substreams::handlers::map]
 fn map_events(blk: eth::Block) -> Result<contract::Events, substreams::errors::Error> {
     let mut events = contract::Events::default();
     map_pool_events(&blk, &mut events);
@@ -658,20 +701,20 @@ fn graph_out(events: contract::Events) -> Result<EntityChanges, substreams::erro
 #[substreams::handlers::map]
 fn csv_out(blk: eth::Block) -> Result<Lines, substreams::errors::Error> {
     Ok(Lines {
-        lines: get_swaps(&blk).map(|trx| trx.to_csv()).collect(),
+        lines: get_swaps_iter(&blk).map(|trx| trx.to_csv()).collect(),
     })
 }
 
 #[substreams::handlers::map]
 fn jsonl_out(blk: eth::Block) -> Result<Lines, substreams::errors::Error> {
     Ok(Lines {
-        lines: get_swaps(&blk)
+        lines: get_swaps_iter(&blk)
             .map(|trx| serde_json::to_string(&trx).unwrap())
             .collect(),
     })
 }
 
-fn get_swaps<'a>(blk: &'a eth::Block) -> impl Iterator<Item = PoolSwap> + 'a {
+fn get_swaps_iter<'a>(blk: &'a eth::Block) -> impl Iterator<Item = PoolSwap> + 'a {
     blk.receipts().flat_map(move |view| {
         view.receipt
             .logs

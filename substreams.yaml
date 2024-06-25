@@ -30,6 +30,23 @@ modules:
     output:
       type: proto:contract.v1.Events
 
+  - name: map_swap_events
+    kind: map
+    initialBlock: 20091116
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:contract.v1.Events
+
+  - name: proof_out
+    kind: map
+    initialBlock: 20091116
+    inputs:
+      - map: map_events
+    output:
+      type: proto:contract.v1.Events
+
+
   - name: db_out
     kind: map
     initialBlock: 13924641

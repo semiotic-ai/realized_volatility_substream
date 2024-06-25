@@ -24,3 +24,10 @@ When you use the substreams-sink-files tool, you will find that it syncs up to t
 
 There is also a tutorial in [here](https://github.com/streamingfast/substreams-sink-files/tree/master/docs/tutorial) on how to use substreams sink.
 
+
+### Running on the chain head
+
+```
+substreams run substreams.yaml map_swap_transfers
+```
+
